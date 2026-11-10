@@ -15,6 +15,7 @@ import {
   loadLocalEnv,
   loadPreviousAiIndex,
 } from "./build-skill-embeddings.mjs";
+import { createGithubUrl, loadSubmodules } from "./github-url.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const SITE_ROOT = path.resolve(SCRIPT_DIRECTORY, "..");
@@ -25,7 +26,7 @@ const API_DATA_ROOT = path.join(SITE_ROOT, "api", "data");
 const AI_INDEX_PATH = path.join(API_DATA_ROOT, "ai-index.json");
 const SEARCH_INDEX_PATH = path.join(API_DATA_ROOT, "search-index.json");
 
-const GITHUB_BASE_URL = "https://github.com/fdshg693/AI";
+const githubUrl = createGithubUrl(loadSubmodules(REPO_ROOT));
 
 function isUnset(value) {
   return !value || value.trim() === "" || value.trim().toLowerCase() === "none";
@@ -58,7 +59,7 @@ function resolveRequiresSkills(value, allSkills) {
  */
 function resolveRequiresHooks(value) {
   if (isUnset(value)) return null;
-  return { text: value, href: `${GITHUB_BASE_URL}/tree/main/agent-compat/agent-tooling/agent_tooling/hooks/scenarios` };
+  return { text: value, href: githubUrl("tree", "agent-compat/agent-tooling/agent_tooling/hooks/scenarios") };
 }
 
 /**
@@ -76,7 +77,7 @@ function resolveRequiresRepoTools(value, repoRoot) {
     .filter(Boolean)
     .map((token) => {
       const exists = fs.existsSync(path.join(repoRoot, token));
-      return { text: token, href: exists ? `${GITHUB_BASE_URL}/tree/main/${token}` : null };
+      return { text: token, href: exists ? githubUrl("tree", token) : null };
     });
 }
 

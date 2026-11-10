@@ -15,14 +15,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { RELEASED_TOOLS } from "./repo-tools-data.mjs";
+import { createGithubUrl, loadSubmodules } from "../../skills-site/scripts/github-url.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const SITE_ROOT = path.resolve(SCRIPT_DIRECTORY, "..");
 const REPO_ROOT = path.resolve(SITE_ROOT, "..", "..");
 const TOOLS_DOCS_DIRECTORY = path.join(SITE_ROOT, "docs", "tools");
 
-// Mirrors GITHUB_BASE_URL in site/skills-site/scripts/repo-tools-registry.mjs.
-const GITHUB_BASE_URL = "https://github.com/fdshg693/AI";
+// Links into submodules go to their own repositories (see skills-site/scripts/github-url.mjs).
+const githubUrl = createGithubUrl(loadSubmodules(REPO_ROOT));
 
 function rewriteRelativeLinks(markdown, readmeDir) {
   return markdown.replace(/\]\(([^)]+)\)/g, (match, target) => {
@@ -33,7 +34,7 @@ function rewriteRelativeLinks(markdown, readmeDir) {
     const isDirectory = fs.existsSync(absolutePath) && fs.statSync(absolutePath).isDirectory();
     const githubType = isDirectory ? "tree" : "blob";
     const anchor = hash ? `#${hash}` : "";
-    return `](${GITHUB_BASE_URL}/${githubType}/main/${repoRelativePath}${anchor})`;
+    return `](${githubUrl(githubType, repoRelativePath)}${anchor})`;
   });
 }
 

@@ -14,7 +14,10 @@ import {
 } from "../scripts/build-skill-embeddings.mjs";
 import { discoverSkills, parseSkillDocument, skillBundleFolder, zipFileName } from "../scripts/publication-core.mjs";
 import { REPO_TOOLS_REGISTRY } from "../scripts/repo-tools-registry.mjs";
+import { createGithubUrl, loadSubmodules, parseGitmodules } from "../scripts/github-url.mjs";
 import { validatePublication, zipEntries } from "../scripts/validate-publication.mjs";
+
+const githubUrl = createGithubUrl(loadSubmodules(path.resolve(import.meta.dirname, "..", "..", "..")));
 
 /** Deterministic stub so publication tests never call OpenRouter. */
 async function stubAttachEmbeddings(skills) {
@@ -222,7 +225,7 @@ test("resolves requires_skills to unique/none/multiple matches, and requires_rep
   ]);
   assert.equal(consumer.meta.requiresHooks, null);
   assert.deepEqual(consumer.meta.requiresRepoTools, [
-    { text: "tools/aim", href: "https://github.com/fdshg693/AI/tree/main/tools/aim" },
+    { text: "tools/aim", href: githubUrl("tree", "tools/aim") },
     { text: "does/not/exist", href: null },
   ]);
 
@@ -253,7 +256,7 @@ test("wraps a set requires_hooks value into a single link to the hook scenarios"
   const hooked = result.catalog.skills.find((skill) => skill.name === "hooked-skill");
   assert.deepEqual(hooked.meta.requiresHooks, {
     text: "PreToolUse: Bash差し戻し",
-    href: "https://github.com/fdshg693/AI/tree/main/agent-compat/agent-tooling/agent_tooling/hooks/scenarios",
+    href: "https://github.com/fdshg693/AI-agent-compat/tree/main/agent-tooling/agent_tooling/hooks/scenarios",
   });
 });
 
@@ -280,7 +283,7 @@ test("embeds repo-tools.yaml's registry in catalog.json with GitHub folder links
   assert.ok(REPO_TOOLS_REGISTRY.length > 0);
   assert.deepEqual(result.catalog.repoTools, REPO_TOOLS_REGISTRY);
   for (const tool of result.catalog.repoTools) {
-    assert.equal(tool.githubUrl, `https://github.com/fdshg693/AI/tree/main/${tool.path}`);
+    assert.equal(tool.githubUrl, githubUrl("tree", tool.path));
     assert.equal(Object.keys(tool).sort().join(","), "githubUrl,name,path");
   }
 });
@@ -380,4 +383,17 @@ test("zipFileName escapes a leading dot so the file isn't dropped by Azure SWA's
   assert.ok(!name.startsWith("."));
   assert.match(name, /^dot-claude--skills--foo--SKILL\.md--[0-9a-f]{12}\.zip$/);
   assert.equal(zipFileName("skills/plugins/cc-knowledge/skills/foo/SKILL.md").startsWith("."), false);
+});
+
+test("links paths inside a submodule to the submodule repository", () => {
+  const submodules = parseGitmodules(
+    '[submodule "tools"]\n\tpath = tools\n\turl = https://github.com/o/AI-tools.git\n' +
+      '[submodule "tools/x"]\n\tpath = tools/x\n\turl = https://github.com/o/X\n',
+  );
+  const url = createGithubUrl(submodules, "https://github.com/o/AI");
+  assert.equal(url("tree", "tools/aim"), "https://github.com/o/AI-tools/tree/main/aim");
+  assert.equal(url("blob", "tools/x/README.md"), "https://github.com/o/X/blob/main/README.md");
+  assert.equal(url("tree", "tools"), "https://github.com/o/AI-tools/tree/main");
+  assert.equal(url("blob", "toolsx/a.md"), "https://github.com/o/AI/blob/main/toolsx/a.md");
+  assert.equal(url("blob", "registry/x.yaml"), "https://github.com/o/AI/blob/main/registry/x.yaml");
 });

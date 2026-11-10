@@ -10,13 +10,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
+import { createGithubUrl, loadSubmodules } from "./github-url.mjs";
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIRECTORY, "..", "..", "..");
 const REPO_TOOLS_YAML_PATH = path.join(REPO_ROOT, "registry", "repo-tools.yaml");
 
-// Mirrors GITHUB_BASE_URL in build-catalog.mjs.
-const GITHUB_BASE_URL = "https://github.com/fdshg693/AI";
+const githubUrl = createGithubUrl(loadSubmodules(REPO_ROOT));
 
 export function loadRepoToolsRegistry(filePath = REPO_TOOLS_YAML_PATH) {
   const data = yaml.load(fs.readFileSync(filePath, "utf8"));
@@ -27,7 +27,7 @@ export function loadRepoToolsRegistry(filePath = REPO_TOOLS_YAML_PATH) {
     .map(([name, definition]) => ({
       name,
       path: definition?.path ?? "",
-      githubUrl: `${GITHUB_BASE_URL}/tree/main/${definition?.path ?? ""}`,
+      githubUrl: githubUrl("tree", definition?.path ?? ""),
     }))
     .sort((a, b) => a.name.localeCompare(b.name, "en"));
 }
