@@ -6,7 +6,7 @@
  * leave stale pages behind.
  *
  * README bodies are embedded verbatim except for one rewrite: relative
- * markdown links (e.g. `[SKILL.md](../../claude-plugins/.../SKILL.md)`) only
+ * markdown links (e.g. `[SKILL.md](../../skills/plugins/.../SKILL.md)`) only
  * resolve inside the source repo, not inside this VitePress docs tree, so
  * they're rewritten to absolute GitHub blob/tree URLs.
  */
