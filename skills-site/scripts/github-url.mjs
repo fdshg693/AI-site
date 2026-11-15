@@ -2,7 +2,7 @@
  * GitHub links for umbrella-relative paths (fdshg693/AI).
  *
  * After the submodule split, `skills/`, `tools/`, `agent-compat/` and `site/`
- * are gitlinks in the umbrella: `github.com/fdshg693/AI/tree/main/tools/aim`
+ * are gitlinks in the umbrella: `github.com/fdshg693/AI/tree/main/tools/llm/aim`
  * is a 404. A path under a submodule is linked into that submodule's own
  * repository instead (read from the umbrella's `.gitmodules`), at its `main`.
  * Shared by skills-site and tools-site.
