@@ -59,7 +59,7 @@ function resolveRequiresSkills(value, allSkills) {
  */
 function resolveRequiresHooks(value) {
   if (isUnset(value)) return null;
-  return { text: value, href: githubUrl("tree", "agent-compat/agent-tooling/agent_tooling/hooks/scenarios") };
+  return { text: value, href: githubUrl("tree", "agent-compat/hooks/agent-tooling/agent_tooling/hooks/scenarios") };
 }
 
 /**
